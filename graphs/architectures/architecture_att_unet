@@ -1,0 +1,140 @@
+strict digraph model {
+	graph [ordering=in rankdir=TB size="44.1,44.1" bgcolor=black]
+	node [align=left fontname="Linux libertine" fontsize=10 height=0.2 margin=0 ranksep=0.1 shape=plaintext style=filled]
+	edge [fontsize=10 color=white]
+	0 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                        <TR><TD>input-tensor<BR/>depth:0</TD><TD>(1, 1, 262144)</TD></TR>
+                    </TABLE>> fillcolor=lightyellow]
+  subgraph cluster_6 {
+		fontsize=12 label=Encoders labeljust=l style=dashed fontcolor=yellow color=yellow
+		9 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">Conv1d + ReLU<BR/>depth:2</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(B_S, H, F) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(B_S, 2H, F/2) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=darkseagreen1]
+	}
+  
+  
+	subgraph cluster_8 {
+		fontsize=12 label=MultiheadAttBlock labeljust=l style=dashed fontcolor=yellow color=yellow
+		
+		subgraph cluster_9 {
+			fontsize=12 label=MultiheadAttention labeljust=l style=dashed fontcolor=yellow color=yellow
+			
+			15 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">multi_head_attention_forward<BR/>depth:3</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">3 x (2H, B_S, F/2) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(2H, B_S, F/2), (IRRELEVANT) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=aliceblue]
+		}
+		50 [label=<
+            <TABLE BORDER="0" CELLBORDER="1"
+            CELLSPACING="0" CELLPADDING="4">
+            <TR>
+                <TD ROWSPAN="2">Concat + LayerNorm<BR/>depth:3</TD>
+                <TD COLSPAN="2">input:</TD>
+                <TD COLSPAN="2">2 x (B_S, 2H, F/2) </TD>
+            </TR>
+            <TR>
+                <TD COLSPAN="2">output: </TD>
+                <TD COLSPAN="2">(B_S, 2H, F/2) </TD>
+            </TR>
+            </TABLE>> fillcolor=aliceblue]
+		subgraph cluster_10 {
+			fontsize=12 label=FeedForward labeljust=l style=dashed
+			21 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">Linear + ReLU + Linear<BR/></TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">2 x (B_S, 2H, F/2) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(B_S, 2H, F/2) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=darkseagreen1]
+			22 [label=<
+                    <TABLE BORDER="0" CELLBORDER="1"
+                    CELLSPACING="0" CELLPADDING="4">
+                    <TR>
+                        <TD ROWSPAN="2">Dropout<BR/>depth:3</TD>
+                        <TD COLSPAN="2">input:</TD>
+                        <TD COLSPAN="2">(B_S, 2H, F/2) </TD>
+                    </TR>
+                    <TR>
+                        <TD COLSPAN="2">output: </TD>
+                        <TD COLSPAN="2">(B_S, 2H, F/2) </TD>
+                    </TR>
+                    </TABLE>> fillcolor=darkseagreen1]
+		}
+		
+	}
+      71 [label=<
+          <TABLE BORDER="0" CELLBORDER="1"
+          CELLSPACING="0" CELLPADDING="4">
+          <TR>
+              <TD ROWSPAN="2">Intermediate Linear Layer<BR/>depth:2</TD>
+              <TD COLSPAN="2">input:</TD>
+              <TD COLSPAN="2">2 x (B_S, H, F/2) </TD>
+          </TR>
+          <TR>
+              <TD COLSPAN="2">output: </TD>
+              <TD COLSPAN="2">(B_S, H/2, 2F) </TD>
+          </TR>
+          </TABLE>> fillcolor=darkseagreen1]
+  
+    subgraph cluster_9 {
+		fontsize=12 label=Decoders labeljust=l style=dashed fontcolor=yellow color=yellow
+		61 [label=<
+            <TABLE BORDER="0" CELLBORDER="1"
+            CELLSPACING="0" CELLPADDING="4">
+            <TR>
+                <TD ROWSPAN="2">Conv1d + ReLU<BR/>depth:2</TD>
+                <TD COLSPAN="2">input:</TD>
+                <TD COLSPAN="2">(B_S, H, F) </TD>
+            </TR>
+            <TR>
+                <TD COLSPAN="2">output: </TD>
+                <TD COLSPAN="2">(B_S, H/2, 2F) </TD>
+            </TR>
+            </TABLE>> fillcolor=darkseagreen1]
+	}
+    100 [label=<
+        <TABLE BORDER="0" CELLBORDER="1"
+        CELLSPACING="0" CELLPADDING="4">
+            <TR><TD>output-tensor<BR/>depth:0</TD><TD>(1, 1, 262144)</TD></TR>
+        </TABLE>> fillcolor=lightyellow]
+  
+    0 -> 9
+	9 -> 15
+    9 -> 50
+    15 -> 50
+    50 -> 21
+    21 -> 22
+	22 -> 71
+    50 -> 71
+    71 -> 61
+    9 -> 61
+    61 -> 100
+	
+}
