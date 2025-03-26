@@ -39,8 +39,8 @@ if __name__ == "__main__":
         print("You can also just delete combined_noisy_waves.pt and combined_clean_waves.pt")
         exit()
 
-    clean_dir = os.path.join(RAW_DATA_PATH, "clean_train")
-    noisy_dir = os.path.join(RAW_DATA_PATH, "noisy_train")
+    clean_dir = os.path.join(RAW_DATA_PATH, "clean_trainset_28spk_wav")
+    noisy_dir = os.path.join(RAW_DATA_PATH, "noisy_trainset_28spk_wav")
 
     for cfile, nfile in zip(os.listdir(clean_dir), os.listdir(noisy_dir)):
         if cfile != nfile:
